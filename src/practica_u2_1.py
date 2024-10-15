@@ -13,7 +13,19 @@ def comprobar_importe(valor: str) -> bool:
     Returns:
         bool: True si el valor es un número válido (positivo, negativo o con punto decimal), False en caso contrario.
     """
+    valor = valor.strip()
 
+    if valor.count(".") == 1 or valor.count(".") == 0:
+        valor = valor.replace(".", "")
+    else:
+        return False
+    
+    if (valor.startswith("-") and valor.count("-") == 1) or valor.count("-") == 0:
+        valor = valor.replace("-","")
+    else:
+        return False
+    
+    return valor.isdigit()
 
 def comprobar_comando(comando: str) -> bool:
     """
@@ -25,13 +37,17 @@ def comprobar_comando(comando: str) -> bool:
     Returns:
         bool: True si el comando está en la lista de comandos válidos, False en caso contrario.
     """
+    if comando.lower() == "compra" or comando.lower() == "venta" or comando.lower() == "saldo" or comando.lower() == "reset" or comando.lower() == "fin":
+        return True
+    else:
+        return False
 
 
 def mostrar_mensaje_error():
     """
     Muestra el mensaje de error por entrada inválida.
     """
-
+    print("*ERROR* Entrada inválida")
 
 def procesar_compra(saldo: float, importe: float) -> float:
     """
@@ -44,7 +60,9 @@ def procesar_compra(saldo: float, importe: float) -> float:
     Returns:
         float: El saldo actualizado después de realizar la compra.
     """
+    saldo = float(saldo) - float(importe)
 
+    return saldo
 
 def procesar_venta(saldo: float, importe: float) -> float:
     """
@@ -57,7 +75,9 @@ def procesar_venta(saldo: float, importe: float) -> float:
     Returns:
         float: El saldo actualizado después de realizar la venta.
     """
+    saldo = float(saldo) + float(importe)
 
+    return saldo
 
 def mostrar_saldo(saldo: float, cont_compras: int, cont_ventas: int):
     """
@@ -69,6 +89,7 @@ def mostrar_saldo(saldo: float, cont_compras: int, cont_ventas: int):
         cont_ventas (int): Número total de ventas realizadas.
     """
 
+    return f"Saldo actual = {saldo} ({cont_compras} compras y {cont_ventas} ventas)"
 
 def resetear_saldo(saldo: float, cont_compras: int, cont_ventas: int) -> tuple[float, int, int]:
     """
@@ -82,7 +103,9 @@ def resetear_saldo(saldo: float, cont_compras: int, cont_ventas: int) -> tuple[f
     Returns:
         tuple[float, int, int]: El nuevo saldo (0), número de compras (0) y número de ventas (0) después del reinicio.
     """
+    print(f"Saldo anterior = {saldo} ({cont_compras} compras y {cont_ventas} ventas).")
 
+    return 0, 0, 0
 
 def recuperar_comando_e_importe(linea: str) -> tuple[str, str]:
     """
@@ -112,7 +135,6 @@ def recuperar_comando_e_importe(linea: str) -> tuple[str, str]:
         return lista_palabras[0], lista_palabras[1]
     else:
         return None, None
-
 
 def main():
     """
@@ -149,33 +171,46 @@ def main():
         Saldo actual = 0.00 (0 compras y 0 ventas)
         > fin
     """
+
     cont_compras = 0
     cont_ventas = 0
     saldo = 0
+    encuentra_fin = False
 
     while not encuentra_fin:
 
+        linea = input("Introduzca un comando: ")
         comando, importe = recuperar_comando_e_importe(linea)
+
+        # if comando == "deshacer":
+        #     saldo = saldo_temp
+        #     cont_compras = cont_compras_temp
+        #     cont_ventas = cont_ventas_temp
+        #     continue
+
+        # saldo_temp = saldo
+        # cont_compras_temp = cont_compras
+        # cont_ventas_temp = cont_ventas
 
         if comando is None or not comprobar_comando(comando):
             mostrar_mensaje_error()
         elif comando in ("saldo", "reset", "fin") and importe is not None:
-            
+            mostrar_mensaje_error()
         elif comando == "saldo":
-            
+            print(mostrar_saldo(saldo, cont_compras, cont_ventas))
         elif comando == "reset":
-            
+            saldo, cont_compras, cont_ventas = resetear_saldo(saldo, cont_compras, cont_ventas)
         elif comando == "fin":
-            
+            encuentra_fin = True
         elif importe is None or not comprobar_importe(importe):
-            
+            mostrar_mensaje_error()
         else:
-
             if comando == "compra":
-
+                saldo = procesar_compra(saldo, importe)
+                cont_compras += 1
             elif comando == "venta":
-
-
-            
+                saldo = procesar_venta(saldo, importe)
+                cont_ventas += 1
+    
 if __name__ == "__main__":
     main()
